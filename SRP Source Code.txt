@@ -1,0 +1,96 @@
+Public Class srform
+    Dim fno As Integer
+
+    Private Sub btnrec_Click(sender As Object, e As EventArgs) Handles btnrec.Click
+        fno = 0
+        tmrrec.Enabled = True
+
+    End Sub
+
+    Private Sub btnstop_Click(sender As Object, e As EventArgs) Handles btnstop.Click
+        tmrrec.Enabled = False
+
+    End Sub
+
+    Private Sub take_clip()
+        Dim ss As Bitmap
+        Dim graph As Graphics
+        Dim bnd As Rectangle = My.Computer.Screen.Bounds
+
+        ss = New Bitmap(bnd.Width, bnd.Height, Imaging.PixelFormat.Format32bppArgb)
+        graph = Graphics.FromImage(ss)
+        graph.CopyFromScreen(0, 0, 0, 0, bnd.Size)
+        pbrecorder.Image = ss
+
+
+    End Sub
+
+    Private Sub save_clip()
+        Dim path As String = Application.StartupPath & "\img0" & fno & ".png"
+        pbrecorder.Image.Save(path, Imaging.ImageFormat.Png)
+
+
+
+
+    End Sub
+
+    Private Sub tmrrec_Tick(sender As Object, e As EventArgs) Handles tmrrec.Tick
+        take_clip()
+        save_clip()
+        fno += 1
+
+
+    End Sub
+
+    Private Sub convert_to_video()
+        Dim ffmpeg = "D:\SIPU\Screen Recorder Project\ScreenRecorder\ScreenRecorder\bin\ffmpeg.exe"
+        Dim strarg As String = "-video_size 1024x768 -framerate 1 -i img0%d.png output.avi"
+
+        Dim myprocess As New ProcessStartInfo
+        myprocess.FileName = ffmpeg
+        myprocess.Arguments = strarg
+        Process.Start(myprocess)
+
+    End Sub
+
+    Private Sub btncon_Click(sender As Object, e As EventArgs) Handles btncon.Click
+        convert_to_video()
+        MsgBox("Video create successfully!")
+        Dim strress As String = MessageBox.Show("Do you want to view the output file", "confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+        If strress = vbYes Then
+            Process.Start(Application.StartupPath & "\output.avi")
+
+
+        End If
+    End Sub
+
+    Private Sub btndel_Click(sender As Object, e As EventArgs) Handles btndel.Click
+        Try
+            Dim i As Integer = 0
+            For i = 0 To fno
+                Dim path As String = Application.StartupPath & "\img0" & i & ".png"
+                My.Computer.FileSystem.DeleteFile(path)
+
+            Next
+
+            MsgBox("All Frames deleted successfully")
+
+        Catch ex As IO.FileNotFoundException
+
+        End Try
+    End Sub
+
+    Private Sub btnopen_Click(sender As Object, e As EventArgs) Handles btnopen.Click
+        Process.Start(Application.StartupPath & "\output.avi")
+
+    End Sub
+
+    Private Sub btnexit_Click(sender As Object, e As EventArgs) Handles btnexit.Click
+        Me.Close()
+
+    End Sub
+
+    Private Sub srform_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+    End Sub
+End Class
